@@ -35,32 +35,32 @@ export async function PUT(request: NextRequest) {
         )
       }
 
-    // Update user email
-    const updatedUser = await prisma.user.update({
-      where: { id: authenticatedReq.user!.id },
-      data: { 
-        email: newEmail.toLowerCase(),
-        updatedAt: new Date()
-      },
-      select: {
-        id: true,
-        email: true,
-        name: true
-      }
-    })
+      // Update user email
+      const updatedUser = await prisma.user.update({
+        where: { id: authenticatedReq.user!.id },
+        data: { 
+          email: newEmail.toLowerCase(),
+          updatedAt: new Date()
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true
+        }
+      })
 
-    return NextResponse.json({
-      success: true,
-      message: "Email updated successfully",
-      user: updatedUser
-    })
+      return NextResponse.json({
+        success: true,
+        message: "Email updated successfully",
+        user: updatedUser
+      })
 
-  } catch (error) {
-    console.error("Failed to update email:", error)
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    )
-  }
+    } catch (error) {
+      console.error("Failed to update email:", error)
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 }
+      )
+    }
   })
 }
