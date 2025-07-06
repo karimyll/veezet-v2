@@ -3,8 +3,9 @@
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/Button"
+import { Suspense } from "react"
 
-export default function ComingSoonPage() {
+function ComingSoonContent() {
   const searchParams = useSearchParams()
   const productId = searchParams.get("product")
 
@@ -44,5 +45,13 @@ export default function ComingSoonPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function ComingSoonPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ComingSoonContent />
+    </Suspense>
   )
 }

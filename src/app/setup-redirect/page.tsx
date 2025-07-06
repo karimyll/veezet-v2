@@ -3,8 +3,9 @@
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/Button"
+import { Suspense } from "react"
 
-export default function SetupRedirectPage() {
+function SetupRedirectContent() {
   const searchParams = useSearchParams()
   const productId = searchParams.get("product")
 
@@ -45,5 +46,13 @@ export default function SetupRedirectPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function SetupRedirectPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SetupRedirectContent />
+    </Suspense>
   )
 }

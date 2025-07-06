@@ -147,16 +147,17 @@ async function trackView(slug: string) {
 export default async function PublicCardPage({ 
   params 
 }: { 
-  params: { slug: string } 
+  params: Promise<{ slug: string }> 
 }) {
-  const cardData = await getCardData(params.slug)
+  const resolvedParams = await params
+  const cardData = await getCardData(resolvedParams.slug)
 
   if (!cardData) {
     notFound()
   }
 
   // Track view in the background (fire and forget)
-  trackView(params.slug)
+  trackView(resolvedParams.slug)
 
   return <ClientCardPage initialCardData={cardData} />
 }

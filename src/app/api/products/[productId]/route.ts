@@ -4,12 +4,12 @@ import { prisma } from "@/lib/prisma"
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { productId: string } }
+  { params }: { params: Promise<{ productId: string }> }
 ) {
   return withAuth(request, async (req: AuthenticatedRequest) => {
     try {
       const userId = req.user!.id
-      const { productId } = params
+      const { productId } = await params
       const body = await req.json()
 
       // Validate required fields
