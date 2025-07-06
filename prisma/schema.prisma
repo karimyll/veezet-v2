@@ -1,0 +1,234 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model CatalogProduct {
+  id                String            @id @default(cuid())
+  name              String
+  description       String?
+  imageUrl          String?
+  oneTimePrice      Float
+  monthlyServiceFee Float?
+  yearlyServiceFee  Float?
+  type              ProductType
+  plan              BusinessCardPlan?
+  isActive          Boolean           @default(true)
+  ownedProducts     Product[]
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?   // Optional for OAuth users
+  role          UserRole  @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+  products      Product[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Product {
+  id                    String               @id @default(cuid())
+  name                  String
+  type                  ProductType
+  status                ProductStatus        @default(PENDING_ACTIVATION)
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  ownerId               String
+  catalogProductId      String
+  businessCardProfileId String?              @unique
+  redirectItemId        String?              @unique
+  staticItemId          String?              @unique
+  businessCardProfile   BusinessCardProfile? @relation(fields: [businessCardProfileId], references: [id])
+  catalogProduct        CatalogProduct       @relation(fields: [catalogProductId], references: [id])
+  owner                 User                 @relation(fields: [ownerId], references: [id])
+  redirectItem          RedirectItem?        @relation(fields: [redirectItemId], references: [id])
+  staticItem            StaticItem?          @relation(fields: [staticItemId], references: [id])
+  subscriptions         Subscription[]
+}
+
+model Subscription {
+  id                           String             @id @default(cuid())
+  status                       SubscriptionStatus
+  plan                         BusinessCardPlan?
+  price                        Float
+  billingCycle                 BillingCycle
+  currentPeriodStart           DateTime?
+  currentPeriodEnd             DateTime?
+  paymentGatewaySubscriptionId String             @unique
+  createdAt                    DateTime           @default(now())
+  updatedAt                    DateTime           @updatedAt
+  productId                    String
+  payments                     Payment[]
+  product                      Product            @relation(fields: [productId], references: [id])
+}
+
+model Payment {
+  id                          String        @id @default(cuid())
+  amount                      Float
+  currency                    String
+  status                      PaymentStatus
+  paymentGatewayTransactionId String        @unique
+  createdAt                   DateTime      @default(now())
+  subscriptionId              String
+  subscription                Subscription  @relation(fields: [subscriptionId], references: [id])
+}
+
+model BusinessCardProfile {
+  id                String           @id @default(cuid())
+  slug              String           @unique
+  plan              BusinessCardPlan @default(STARTER)
+  fullName          String?
+  title             String?
+  profilePictureUrl String?
+  notes             String?
+  views             Int              @default(0)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @default(now()) @updatedAt
+  additionalLinks   AdditionalLink[]
+  contacts          ContactInfo[]
+  messages          Message[]
+  Product           Product?
+  socialLinks       SocialLink[]
+}
+
+model RedirectItem {
+  id        String   @id @default(cuid())
+  targetUrl String
+  Product   Product?
+}
+
+model StaticItem {
+  id          String   @id @default(cuid())
+  description String?
+  Product     Product?
+}
+
+model ContactInfo {
+  id        String              @id @default(cuid())
+  type      ContactType
+  value     String
+  profileId String
+  profile   BusinessCardProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model SocialLink {
+  id        String              @id @default(cuid())
+  name      String
+  icon      String?
+  url       String
+  profileId String
+  profile   BusinessCardProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model AdditionalLink {
+  id        String              @id @default(cuid())
+  title     String
+  icon      String?
+  url       String
+  profileId String
+  profile   BusinessCardProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+  id                 String              @id @default(cuid())
+  senderName         String
+  senderEmail        String
+  senderMessage      String
+  isSeen             Boolean             @default(false)
+  sentAt             DateTime            @default(now())
+  recipientProfileId String
+  recipientProfile   BusinessCardProfile @relation(fields: [recipientProfileId], references: [id], onDelete: Cascade)
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
+enum ProductStatus {
+  PENDING_ACTIVATION
+  ACTIVE
+  INACTIVE
+}
+
+enum ProductType {
+  BUSINESS_CARD
+  REDIRECT_ITEM
+  STATIC_ITEM
+}
+
+enum BusinessCardPlan {
+  STARTER
+  PROFESSIONAL
+  BUSINESS
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  INACTIVE
+  TRIALING
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESSFUL
+  FAILED
+}
+
+enum ContactType {
+  PHONE
+  EMAIL
+  ADDRESS
+}

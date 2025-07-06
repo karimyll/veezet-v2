@@ -1,0 +1,287 @@
+{
+  "designSystem": {
+    "name": "Modern Dashboard Design System",
+    "version": "1.0",
+    "description": "A comprehensive design system profile for creating modern, data-driven dashboard interfaces",
+    
+    "colorPalette": {
+      "primary": {
+        "brand": "#007AFF",
+        "brandHover": "#0056CC",
+        "brandLight": "#E5F3FF"
+      },
+      "secondary": {
+        "purple": "#8B5CF6",
+        "purpleLight": "#F3F0FF",
+        "pink": "#EC4899",
+        "green": "#10B981",
+        "orange": "#F59E0B",
+        "teal": "#06B6D4"
+      },
+      "neutrals": {
+        "white": "#FFFFFF",
+        "gray50": "#F9FAFB",
+        "gray100": "#F3F4F6",
+        "gray200": "#E5E7EB",
+        "gray300": "#D1D5DB",
+        "gray400": "#9CA3AF",
+        "gray500": "#6B7280",
+        "gray600": "#4B5563",
+        "gray700": "#374151",
+        "gray800": "#1F2937",
+        "gray900": "#111827"
+      },
+      "backgrounds": {
+        "light": "#FFFFFF",
+        "dark": "#0F0F0F",
+        "darkCard": "#1A1A1A",
+        "darkSecondary": "#2A2A2A"
+      },
+      "status": {
+        "success": "#10B981",
+        "warning": "#F59E0B",
+        "error": "#EF4444",
+        "info": "#3B82F6"
+      }
+    },
+
+    "typography": {
+      "fontFamily": {
+        "primary": "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        "monospace": "'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace"
+      },
+      "fontSizes": {
+        "xs": "0.75rem",
+        "sm": "0.875rem",
+        "base": "1rem",
+        "lg": "1.125rem",
+        "xl": "1.25rem",
+        "2xl": "1.5rem",
+        "3xl": "1.875rem",
+        "4xl": "2.25rem",
+        "5xl": "3rem"
+      },
+      "fontWeights": {
+        "normal": 400,
+        "medium": 500,
+        "semibold": 600,
+        "bold": 700
+      },
+      "lineHeights": {
+        "tight": 1.25,
+        "normal": 1.5,
+        "relaxed": 1.75
+      }
+    },
+
+    "spacing": {
+      "xs": "0.25rem",
+      "sm": "0.5rem",
+      "md": "1rem",
+      "lg": "1.5rem",
+      "xl": "2rem",
+      "2xl": "3rem",
+      "3xl": "4rem"
+    },
+
+    "borderRadius": {
+      "sm": "0.25rem",
+      "md": "0.5rem",
+      "lg": "0.75rem",
+      "xl": "1rem",
+      "2xl": "1.5rem",
+      "full": "9999px"
+    },
+
+    "shadows": {
+      "sm": "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+      "md": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+      "lg": "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+      "xl": "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+    },
+
+    "components": {
+      "cards": {
+        "style": "clean, minimal with subtle shadows",
+        "borderRadius": "lg",
+        "padding": "lg to xl",
+        "shadow": "sm to md",
+        "background": "white (light mode) or darkCard (dark mode)",
+        "border": "none or 1px solid gray200/gray700",
+        "variants": {
+          "metric": {
+            "description": "Key performance indicator cards",
+            "layout": "compact with large number display",
+            "numberSize": "2xl to 4xl",
+            "labelSize": "sm",
+            "iconPosition": "top-right or left-aligned"
+          },
+          "chart": {
+            "description": "Data visualization containers",
+            "padding": "xl",
+            "headerSpacing": "lg",
+            "contentSpacing": "md"
+          },
+          "list": {
+            "description": "Item listing containers",
+            "itemSpacing": "md",
+            "dividers": "subtle gray lines"
+          }
+        }
+      },
+
+      "charts": {
+        "colorScheme": "multi-color gradient approach",
+        "colors": ["#007AFF", "#8B5CF6", "#10B981", "#F59E0B", "#EC4899", "#06B6D4"],
+        "style": "modern, clean with rounded corners",
+        "barRadius": "sm",
+        "gridLines": "subtle, gray300/gray600",
+        "labels": "gray500/gray400",
+        "tooltips": "dark background with white text"
+      },
+
+      "navigation": {
+        "style": "sidebar-based with clean icons",
+        "width": "16rem to 20rem",
+        "itemSpacing": "sm",
+        "iconSize": "lg",
+        "activeState": "colored background with brand color",
+        "hoverState": "subtle background change"
+      },
+
+      "buttons": {
+        "primary": {
+          "background": "brand color",
+          "text": "white",
+          "borderRadius": "md",
+          "padding": "sm md",
+          "shadow": "sm",
+          "hoverEffect": "slight darken and lift"
+        },
+        "secondary": {
+          "background": "transparent",
+          "text": "gray700/gray300",
+          "border": "1px solid gray300/gray600",
+          "borderRadius": "md",
+          "padding": "sm md"
+        }
+      },
+
+      "inputs": {
+        "style": "clean with subtle borders",
+        "borderRadius": "md",
+        "padding": "md",
+        "border": "1px solid gray300/gray600",
+        "focusState": "brand color border",
+        "placeholder": "gray400"
+      },
+
+      "avatars": {
+        "style": "circular with subtle shadows",
+        "sizes": ["sm: 2rem", "md: 2.5rem", "lg: 3rem"],
+        "borderRadius": "full",
+        "shadow": "sm"
+      },
+
+      "badges": {
+        "style": "rounded with colored backgrounds",
+        "borderRadius": "full",
+        "padding": "xs sm",
+        "fontSize": "xs",
+        "fontWeight": "medium"
+      }
+    },
+
+    "layoutPatterns": {
+      "dashboard": {
+        "structure": "sidebar + main content area",
+        "sidebarWidth": "16rem to 20rem",
+        "mainPadding": "lg to xl",
+        "gridSystem": "CSS Grid with auto-fit columns",
+        "responsiveBreakpoints": {
+          "mobile": "768px",
+          "tablet": "1024px",
+          "desktop": "1280px"
+        }
+      },
+
+      "cardGrid": {
+        "columns": "auto-fit with minmax(300px, 1fr)",
+        "gap": "lg to xl",
+        "responsive": "single column on mobile, 2-3 columns on tablet, 3-4 on desktop"
+      },
+
+      "header": {
+        "height": "4rem to 5rem",
+        "padding": "md lg",
+        "background": "white/dark",
+        "borderBottom": "1px solid gray200/gray700",
+        "alignment": "space-between with centered content"
+      }
+    },
+
+    "interactionPatterns": {
+      "hover": {
+        "cards": "subtle lift with shadow increase",
+        "buttons": "background color change + slight scale",
+        "links": "color change to brand color"
+      },
+      "focus": {
+        "inputs": "brand color border + shadow",
+        "buttons": "outline with brand color"
+      },
+      "active": {
+        "navigation": "background color + icon color change",
+        "buttons": "slight scale down"
+      }
+    },
+
+    "animations": {
+      "duration": {
+        "fast": "150ms",
+        "normal": "300ms",
+        "slow": "500ms"
+      },
+      "easing": {
+        "default": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "bounce": "cubic-bezier(0.68, -0.55, 0.265, 1.55)"
+      },
+      "types": {
+        "fadeIn": "opacity 0 to 1",
+        "slideUp": "transform translateY(20px) to 0",
+        "scaleIn": "transform scale(0.95) to 1"
+      }
+    },
+
+    "darkMode": {
+      "approach": "CSS variables with automatic switching",
+      "backgrounds": {
+        "primary": "#0F0F0F",
+        "secondary": "#1A1A1A",
+        "elevated": "#2A2A2A"
+      },
+      "text": {
+        "primary": "#FFFFFF",
+        "secondary": "#A1A1AA",
+        "muted": "#71717A"
+      },
+      "borders": "#374151"
+    },
+
+    "accessibility": {
+      "colorContrast": "WCAG AA compliant (4.5:1 minimum)",
+      "focusIndicators": "visible and high contrast",
+      "semanticHTML": "proper heading hierarchy and ARIA labels",
+      "keyboardNavigation": "full keyboard accessibility"
+    },
+
+    "designPrinciples": {
+      "hierarchy": "Clear visual hierarchy with typography and spacing",
+      "consistency": "Consistent spacing, colors, and component patterns",
+      "minimalism": "Clean, uncluttered interfaces with purposeful elements",
+      "dataFocus": "Data and metrics prominently displayed",
+      "responsiveness": "Mobile-first design with graceful scaling",
+      "performance": "Lightweight components with smooth animations"
+    }
+  }
+}
