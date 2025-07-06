@@ -162,5 +162,5 @@ export default async function PublicCardPage({
   return <ClientCardPage initialCardData={cardData} />
 }
 
-// Enable ISR with 1 hour revalidation for card pages
-export const revalidate = 3600 // 1 hour
+// Enable ISR with 5 minutes revalidation for card pages
+export const revalidate = 300 // 5 minutes
