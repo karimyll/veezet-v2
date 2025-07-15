@@ -52,7 +52,7 @@ interface UserProduct {
   } | null;
 }
 
-export default function Dashboard() {
+export default function Page() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
