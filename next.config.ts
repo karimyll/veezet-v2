@@ -1,6 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  transpilePackages: [
+    "@heroui/react",
+    "@heroui/theme", 
+    "@heroui/system",
+    "@heroui/dom-animation",
+    "framer-motion"
+  ],
   images: {
     remotePatterns: [
       {

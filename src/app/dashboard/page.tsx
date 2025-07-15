@@ -5,6 +5,10 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { useCachedAPI } from '@/lib/api-cache';
+import { motion, AnimatePresence } from 'framer-motion';
+import AnimatedCard from '@/components/ui/AnimatedCard';
+import AnimatedButton from '@/components/ui/AnimatedButton';
+import LoadingSkeleton from '@/components/ui/LoadingSkeleton';
 
 interface UserProduct {
   id: string;
@@ -124,12 +128,101 @@ export default function Dashboard() {
 
   if (status === 'loading' || !session) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="flex items-center space-x-3">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <div className="text-lg font-medium text-gray-600">Loading...</div>
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="min-h-screen bg-gray-50 flex items-center justify-center"
+      >
+        <motion.div 
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col items-center space-y-4"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-12 h-12 border-4 border-[#4C257B] border-t-transparent rounded-full"
+          />
+          <motion.div
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-lg font-medium text-gray-600"
+          >
+            Yüklənir...
+          </motion.div>
+        </motion.div>
+      </motion.div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="min-h-screen bg-gray-50"
+      >
+        <div className="flex">
+          {/* Sidebar Skeleton */}
+          <div className="w-64 bg-white border-r border-gray-200 min-h-screen p-6">
+            <LoadingSkeleton avatar={true} lines={6} />
+          </div>
+          {/* Main Content Skeleton */}
+          <div className="flex-1 p-8">
+            <div className="mb-8">
+              <LoadingSkeleton lines={2} className="mb-4" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {[...Array(4)].map((_, i) => (
+                <AnimatedCard key={i} delay={i * 0.1} className="p-6">
+                  <LoadingSkeleton lines={3} />
+                </AnimatedCard>
+              ))}
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <AnimatedCard key={i} delay={i * 0.1} className="p-6">
+                  <LoadingSkeleton lines={4} avatar={true} />
+                </AnimatedCard>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
+      </motion.div>
+    );
+  }
+
+  if (error) {
+    return (
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="min-h-screen bg-gray-50 flex items-center justify-center"
+      >
+        <AnimatedCard className="p-8 max-w-md w-full mx-4 text-center">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4"
+          >
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.732 15.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </motion.div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Xəta baş verdi</h3>
+          <p className="text-gray-600 mb-4">Məlumatlar yüklənərkən xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.</p>
+          <AnimatedButton
+            onClick={() => window.location.reload()}
+            className="bg-gradient-to-r from-[#4C257B] to-[#6B46C1] text-white"
+            shimmer={true}
+          >
+            Yenidən cəhd et
+          </AnimatedButton>
+        </AnimatedCard>
+      </motion.div>
     );
   }
 
@@ -184,131 +277,190 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 p-8">
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6 }}
+          className="flex-1 p-8"
+        >
           {/* Header */}
-          <div className="mb-8">
+          <motion.div 
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="mb-8"
+          >
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Welcome back, {session.user?.name || 'User'}
             </h1>
             <p className="text-gray-600">
               Here's what's happening with your NFC products today.
             </p>
-          </div>
+          </motion.div>
 
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {/* Total Products */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+            <AnimatedCard delay={0.1} hoverScale={1.05} className="p-6 border border-gray-200">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-blue-50 rounded-lg">
+                <motion.div 
+                  className="p-3 bg-blue-50 rounded-lg"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  transition={{ duration: 0.2 }}
+                >
                   <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
-                </div>
+                </motion.div>
                 <span className="text-sm text-gray-500">Total</span>
               </div>
-              <div className="text-3xl font-bold text-gray-900 mb-1">
+              <motion.div 
+                className="text-3xl font-bold text-gray-900 mb-1"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
                 {products?.length || 0}
-              </div>
+              </motion.div>
               <div className="text-sm text-gray-500">Products</div>
-            </div>
+            </AnimatedCard>
 
             {/* Active Products */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+            <AnimatedCard delay={0.2} hoverScale={1.05} className="p-6 border border-gray-200">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-green-50 rounded-lg">
+                <motion.div 
+                  className="p-3 bg-green-50 rounded-lg"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  transition={{ duration: 0.2 }}
+                >
                   <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                </div>
+                </motion.div>
                 <span className="text-sm text-gray-500">Active</span>
               </div>
-              <div className="text-3xl font-bold text-green-600 mb-1">
+              <motion.div 
+                className="text-3xl font-bold text-green-600 mb-1"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+              >
                 {activeProducts.length}
-              </div>
+              </motion.div>
               <div className="text-sm text-gray-500">Products</div>
-            </div>
+            </AnimatedCard>
 
             {/* Pending Products */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+            <AnimatedCard delay={0.3} hoverScale={1.05} className="p-6 border border-gray-200">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-orange-50 rounded-lg">
+                <motion.div 
+                  className="p-3 bg-orange-50 rounded-lg"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  transition={{ duration: 0.2 }}
+                >
                   <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                </div>
+                </motion.div>
                 <span className="text-sm text-gray-500">Pending</span>
               </div>
-              <div className="text-3xl font-bold text-orange-600 mb-1">
+              <motion.div 
+                className="text-3xl font-bold text-orange-600 mb-1"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+              >
                 {pendingProducts.length}
-              </div>
+              </motion.div>
               <div className="text-sm text-gray-500">Products</div>
-            </div>
+            </AnimatedCard>
 
             {/* Business Cards */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+            <AnimatedCard delay={0.4} hoverScale={1.05} className="p-6 border border-gray-200">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-purple-50 rounded-lg">
+                <motion.div 
+                  className="p-3 bg-purple-50 rounded-lg"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  transition={{ duration: 0.2 }}
+                >
                   <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
-                </div>
+                </motion.div>
                 <span className="text-sm text-gray-500">Cards</span>
               </div>
-              <div className="text-3xl font-bold text-purple-600 mb-1">
+              <motion.div 
+                className="text-3xl font-bold text-purple-600 mb-1"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
+              >
                 {businessCards.length}
-              </div>
+              </motion.div>
               <div className="text-sm text-gray-500">Business Cards</div>
-            </div>
+            </AnimatedCard>
           </div>
 
           {/* Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+          >
             {/* Products List */}
-            <div className="lg:col-span-2">
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="lg:col-span-2"
+            >
+              <AnimatedCard className="border border-gray-200" hoverShadow={false}>
                 <div className="p-6 border-b border-gray-200">
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-gray-900">Your Products</h2>
-                    <Link
+                    <AnimatedButton
+                      as={Link}
                       href="/marketplace"
-                      className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                      className="bg-gradient-to-r from-[#4C257B] to-[#6B46C1] text-white text-sm font-medium"
+                      shimmer={true}
+                      startContent={
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                      }
                     >
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                      </svg>
                       Add Product
-                    </Link>
+                    </AnimatedButton>
                   </div>
                 </div>
                 
                 <div className="p-6">
-                  {loading ? (
-                    <div className="flex items-center justify-center py-12">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                    </div>
-                  ) : error ? (
-                    <div className="text-center py-12">
-                      <div className="mx-auto w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-4">
-                        <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">Error loading products</h3>
-                      <p className="text-gray-500">{error}</p>
-                    </div>
-                  ) : products && products.length > 0 ? (
+                  {products && products.length > 0 ? (
                     <div className="space-y-4">
-                      {products.map((product) => (
-                        <div key={product.id} className="border border-gray-200 rounded-xl p-6 hover:border-blue-200 transition-colors">
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-start space-x-4 flex-1">
-                              <div className="p-3 bg-gray-50 rounded-lg">
-                                {getProductTypeIcon(product.type)}
-                              </div>
-                              
-                              <div className="flex-1">
-                                <div className="flex items-center space-x-3 mb-2">
+                      <AnimatePresence>
+                        {products.map((product, index) => (
+                          <motion.div
+                            key={product.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.3, delay: index * 0.1 }}
+                            whileHover={{ scale: 1.02 }}
+                            className="border border-gray-200 rounded-xl p-6 hover:border-[#4C257B] transition-all duration-300 bg-gradient-to-r from-white to-gray-50"
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-start space-x-4 flex-1">
+                                <motion.div 
+                                  className="p-3 bg-gray-50 rounded-lg"
+                                  whileHover={{ scale: 1.1, rotate: 5 }}
+                                  transition={{ duration: 0.2 }}
+                                >
+                                  {getProductTypeIcon(product.type)}
+                                </motion.div>
+                                
+                                <div className="flex-1">
+                                  <div className="flex items-center space-x-3 mb-2">
                                   <h3 className="text-lg font-semibold text-gray-900">
                                     {product.catalogProduct.name}
                                   </h3>
@@ -451,7 +603,7 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>

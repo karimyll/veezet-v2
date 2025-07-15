@@ -1,0 +1,290 @@
+{
+  "designSystemProfile": {
+    "name": "Modern SaaS Landing Page Design System",
+    "version": "1.0.0",
+    "description": "A contemporary design system for SaaS landing pages with emphasis on digital products, mobile-first approach, and professional aesthetics",
+    
+    "visualIdentity": {
+      "colorPalette": {
+        "primary": {
+          "purple": "#512784",
+          "vibrantPurple": "#6B46C1",
+          "gradientPurple": "linear-gradient(135deg, #512784 0%, #6B46C1 100%)"
+        },
+        "secondary": {
+          "teal": "#14B8A6",
+          "cyan": "#06B6D4",
+          "mint": "#10B981"
+        },
+        "neutral": {
+          "darkGray": "#1F2937",
+          "mediumGray": "#6B7280",
+          "lightGray": "#F3F4F6",
+          "white": "#FFFFFF"
+        },
+        "accent": {
+          "yellow": "#F59E0B",
+          "orange": "#EA580C",
+          "pink": "#EC4899"
+        }
+      },
+      
+      "typography": {
+    
+        "fontSizes": {
+          "hero": "clamp(2.5rem, 5vw, 4rem)",
+          "h1": "clamp(2rem, 4vw, 3rem)",
+          "h2": "clamp(1.5rem, 3vw, 2.25rem)",
+          "h3": "clamp(1.25rem, 2.5vw, 1.875rem)",
+          "body": "1rem",
+          "small": "0.875rem",
+          "caption": "0.75rem"
+        },
+        "fontWeights": {
+          "light": 300,
+          "normal": 400,
+          "medium": 500,
+          "semibold": 600,
+          "bold": 700,
+          "extrabold": 800
+        },
+        "lineHeights": {
+          "tight": 1.2,
+          "normal": 1.5,
+          "relaxed": 1.75
+        }
+      },
+      
+      "spacing": {
+        "scale": "geometric",
+        "baseUnit": "0.25rem",
+        "values": {
+          "xs": "0.5rem",
+          "sm": "0.75rem",
+          "md": "1rem",
+          "lg": "1.5rem",
+          "xl": "2rem",
+          "2xl": "3rem",
+          "3xl": "4rem",
+          "4xl": "6rem",
+          "5xl": "8rem"
+        }
+      }
+    },
+    
+    "layoutSystem": {
+      "grid": {
+        "type": "flexbox-grid",
+        "columns": 12,
+        "breakpoints": {
+          "mobile": "320px",
+          "tablet": "768px",
+          "desktop": "1024px",
+          "large": "1440px"
+        },
+        "containers": {
+          "fluid": "100%",
+          "constrained": "min(90vw, 1200px)",
+          "narrow": "min(85vw, 800px)"
+        }
+      },
+      
+      "sections": {
+        "hero": {
+          "height": "100vh",
+          "minHeight": "600px",
+          "padding": "clamp(2rem, 8vw, 6rem) 0"
+        },
+        "content": {
+          "padding": "clamp(3rem, 8vw, 6rem) 0"
+        },
+        "feature": {
+          "padding": "clamp(4rem, 10vw, 8rem) 0"
+        }
+      }
+    },
+    
+    "componentPatterns": {
+      "buttons": {
+        "primary": {
+          "background": "linear-gradient(135deg, primary.purple, primary.vibrantPurple)",
+          "borderRadius": "0.75rem",
+          "padding": "0.75rem 2rem",
+          "fontSize": "1rem",
+          "fontWeight": "semibold",
+          "color": "white",
+          "hover": {
+            "transform": "translateY(-2px)",
+            "boxShadow": "0 10px 25px rgba(0,0,0,0.15)"
+          }
+        },
+        "secondary": {
+          "background": "transparent",
+          "border": "2px solid primary.purple",
+          "borderRadius": "0.75rem",
+          "padding": "0.75rem 2rem",
+          "color": "primary.purple",
+          "hover": {
+            "background": "primary.purple",
+            "color": "white"
+          }
+        },
+        "ghost": {
+          "background": "rgba(255,255,255,0.1)",
+          "borderRadius": "0.75rem",
+          "padding": "0.5rem 1.5rem",
+          "fontSize": "0.875rem",
+          "color": "mediumGray"
+        }
+      },
+      
+      "cards": {
+        "product": {
+          "background": "white",
+          "borderRadius": "1.5rem",
+          "padding": "2rem",
+          "boxShadow": "0 4px 6px rgba(0,0,0,0.05), 0 10px 25px rgba(0,0,0,0.1)",
+          "border": "1px solid rgba(0,0,0,0.05)",
+          "hover": {
+            "transform": "translateY(-8px)",
+            "boxShadow": "0 20px 40px rgba(0,0,0,0.15)"
+          }
+        },
+        "feature": {
+          "background": "linear-gradient(135deg, white, lightGray)",
+          "borderRadius": "1rem",
+          "padding": "1.5rem",
+          "border": "1px solid rgba(0,0,0,0.08)"
+        },
+        "step": {
+          "background": "white",
+          "borderRadius": "1.25rem",
+          "padding": "2rem",
+          "textAlign": "center",
+          "boxShadow": "0 2px 4px rgba(0,0,0,0.05)"
+        }
+      },
+      
+      "deviceMockups": {
+        "mobile": {
+          "aspectRatio": "9/19.5",
+          "borderRadius": "2.5rem",
+          "border": "8px solid #1F2937",
+          "background": "white",
+          "boxShadow": "0 25px 50px rgba(0,0,0,0.25)"
+        },
+        "desktop": {
+          "aspectRatio": "16/10",
+          "borderRadius": "0.75rem",
+          "border": "2px solid #E5E7EB",
+          "background": "white",
+          "boxShadow": "0 10px 25px rgba(0,0,0,0.15)"
+        }
+      }
+    },
+    
+    "contentStructure": {
+      "heroSection": {
+        "layout": "centered",
+        "elements": ["headline", "subheadline", "primaryCTA", "heroImage"],
+        "headline": {
+          "structure": "What are [highlighted-word] [main-concept]?",
+          "highlightStyle": "gradient-text or colored-text"
+        }
+      },
+      
+      "featureSection": {
+        "layout": "alternating-grid",
+        "pattern": "image-text-image-text",
+        "elements": ["deviceMockup", "featureTitle", "featureDescription", "featureList"]
+      },
+      
+      "processSection": {
+        "layout": "horizontal-steps",
+        "elements": ["stepNumber", "stepTitle", "stepDescription", "stepIllustration"],
+        "numbering": "Step 1, Step 2, Step 3"
+      },
+      
+      "productShowcase": {
+        "layout": "grid",
+        "columns": "responsive-grid-2-to-4",
+        "elements": ["productImage", "productTitle", "productPrice", "productTag"]
+      }
+    },
+    
+    "visualEffects": {
+      "gradients": {
+        "primary": "linear-gradient(135deg, #512784 0%, #6B46C1 100%)",
+        "secondary": "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+        "subtle": "linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%)"
+      },
+      
+      "animations": {
+        "hover": {
+          "transform": "translateY(-4px) scale(1.02)",
+          "transition": "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+        },
+        "fadeIn": {
+          "opacity": "0 to 1",
+          "transform": "translateY(30px) to translateY(0)",
+          "duration": "0.6s",
+          "easing": "ease-out"
+        }
+      },
+      
+      "shadows": {
+        "subtle": "0 1px 3px rgba(0,0,0,0.1)",
+        "medium": "0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06)",
+        "large": "0 10px 25px rgba(0,0,0,0.15), 0 4px 10px rgba(0,0,0,0.1)",
+        "colored": "0 10px 25px rgba(81, 39, 132, 0.2)"
+      }
+    },
+    
+    "iconography": {
+      "style": "outline",
+      "weight": "2px",
+      "corner": "rounded",
+      "sizes": {
+        "small": "16px",
+        "medium": "24px",
+        "large": "32px",
+        "hero": "48px"
+      },
+      "usage": {
+        "features": "simple-geometric-shapes",
+        "steps": "numbered-circles",
+        "navigation": "standard-interface-icons"
+      }
+    },
+    
+    "responsiveStrategy": {
+      "approach": "mobile-first",
+      "breakpointBehavior": {
+        "mobile": "single-column, stacked-elements",
+        "tablet": "two-column-grid, side-by-side",
+        "desktop": "multi-column, complex-layouts"
+      },
+      "imageStrategy": "responsive-with-art-direction",
+      "typographyStrategy": "fluid-typography-with-clamp"
+    },
+    
+    "brandPersonality": {
+      "tone": "professional-yet-approachable",
+      "style": "modern-minimalist",
+      "characteristics": ["clean", "trustworthy", "innovative", "user-focused"],
+      "visualMood": "confident-and-sleek"
+    },
+    
+    "implementationGuidelines": {
+      "cssFramework": "tailwind-css-compatible",
+      "componentLibrary": "react-or-vue-compatible",
+      "designTokens": "css-custom-properties",
+      "accessibilityLevel": "WCAG-AA-compliant",
+      "performanceTargets": {
+        "loadTime": "under-3-seconds",
+        "lighthouse": "90+",
+        "imageOptimization": "webp-with-fallbacks"
+      }
+    }
+  }
+}
