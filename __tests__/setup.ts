@@ -1,7 +1,9 @@
 import { vi } from 'vitest'
 
 // ─── Mock environment variables ──────────────────────────────────────────────
+process.env.AUTH_SECRET = 'test-secret-key-for-unit-tests'
 process.env.NEXTAUTH_SECRET = 'test-secret-key-for-unit-tests'
+process.env.AUTH_URL = 'http://localhost:3000'
 process.env.NEXTAUTH_URL = 'http://localhost:3000'
 process.env.POSTGRES_URL = 'postgres://test:test@localhost:5432/test'
 process.env.R2_ENDPOINT = 'https://test.r2.cloudflarestorage.com'
@@ -11,19 +13,24 @@ process.env.R2_BUCKET_NAME = 'test-bucket'
 process.env.R2_PUBLIC_URL = 'https://r2.test.com'
 process.env.CLOUDFLARE_ACCOUNT_ID = 'test-account-id'
 
-// ─── Mock next-auth/jwt ─────────────────────────────────────────────────────
+// ─── Mock @/lib/auth ────────────────────────────────────────────────────────
+// In next-auth v5, auth() is exported from @/lib/auth and returns a session
+vi.mock('@/lib/auth', () => ({
+  auth: vi.fn().mockResolvedValue(null),
+  handlers: { GET: vi.fn(), POST: vi.fn() },
+  signIn: vi.fn(),
+  signOut: vi.fn(),
+}))
+
+// ─── Mock next-auth/jwt (still used in some test helpers) ───────────────────
 vi.mock('next-auth/jwt', () => ({
   getToken: vi.fn(),
 }))
 
 // ─── Mock next-auth ─────────────────────────────────────────────────────────
 vi.mock('next-auth', () => ({
+  default: vi.fn(),
   getServerSession: vi.fn(),
-}))
-
-// ─── Mock @/lib/auth ────────────────────────────────────────────────────────
-vi.mock('@/lib/auth', () => ({
-  authOptions: {},
 }))
 
 // ─── Mock @/db ──────────────────────────────────────────────────────────────

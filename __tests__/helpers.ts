@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server'
-import { getToken } from 'next-auth/jwt'
-import { getServerSession } from 'next-auth'
+import { auth } from '@/lib/auth'
 import { vi } from 'vitest'
 
 /**
@@ -49,7 +48,7 @@ export function createFormDataRequest(
 }
 
 /**
- * Mock authenticated user (via next-auth/jwt getToken)
+ * Mock authenticated user (via auth() from @/lib/auth)
  */
 export function mockAuth(user: {
   id: string
@@ -57,26 +56,8 @@ export function mockAuth(user: {
   name?: string
   role?: string
 }) {
-  const mockGetToken = getToken as ReturnType<typeof vi.fn>
-  mockGetToken.mockResolvedValue({
-    id: user.id,
-    email: user.email,
-    name: user.name || null,
-    role: user.role || 'USER',
-  })
-}
-
-/**
- * Mock session-based auth (getServerSession)
- */
-export function mockSession(user: {
-  id: string
-  email: string
-  name?: string
-  role?: string
-}) {
-  const mockGetSession = getServerSession as ReturnType<typeof vi.fn>
-  mockGetSession.mockResolvedValue({
+  const mockAuthFn = auth as ReturnType<typeof vi.fn>
+  mockAuthFn.mockResolvedValue({
     user: {
       id: user.id,
       email: user.email,
@@ -87,13 +68,23 @@ export function mockSession(user: {
 }
 
 /**
+ * Mock session-based auth (same as mockAuth in v5, both use auth())
+ */
+export function mockSession(user: {
+  id: string
+  email: string
+  name?: string
+  role?: string
+}) {
+  mockAuth(user)
+}
+
+/**
  * Clear all auth mocks (no auth)
  */
 export function clearAuth() {
-  const mockGetToken = getToken as ReturnType<typeof vi.fn>
-  mockGetToken.mockResolvedValue(null)
-  const mockGetSession = getServerSession as ReturnType<typeof vi.fn>
-  mockGetSession.mockResolvedValue(null)
+  const mockAuthFn = auth as ReturnType<typeof vi.fn>
+  mockAuthFn.mockResolvedValue(null)
 }
 
 /**

@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { getToken } from 'next-auth/jwt'
+import { auth } from '@/lib/auth'
 
 export interface AuthenticatedRequest extends NextRequest {
   user?: {
@@ -15,9 +15,9 @@ export async function withAuth(
   handler: (req: AuthenticatedRequest) => Promise<Response>
 ): Promise<Response> {
   try {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+    const session = await auth()
     
-    if (!token) {
+    if (!session?.user) {
       return new Response(
         JSON.stringify({ error: 'Authentication required' }),
         { status: 401, headers: { 'Content-Type': 'application/json' } }
@@ -26,10 +26,10 @@ export async function withAuth(
 
     const authenticatedReq = req as AuthenticatedRequest
     authenticatedReq.user = {
-      id: token.id as string,
-      email: token.email!,
-      name: token.name,
-      role: token.role as string || 'USER'
+      id: session.user.id as string,
+      email: session.user.email!,
+      name: session.user.name,
+      role: (session.user as any).role || 'USER'
     }
 
     return handler(authenticatedReq)
@@ -62,15 +62,15 @@ export async function withOptionalAuth(
   handler: (req: AuthenticatedRequest) => Promise<Response>
 ): Promise<Response> {
   try {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+    const session = await auth()
     
     const authenticatedReq = req as AuthenticatedRequest
-    if (token) {
+    if (session?.user) {
       authenticatedReq.user = {
-        id: token.id as string,
-        email: token.email!,
-        name: token.name,
-        role: token.role as string || 'USER'
+        id: session.user.id as string,
+        email: session.user.email!,
+        name: session.user.name,
+        role: (session.user as any).role || 'USER'
       }
     }
 
