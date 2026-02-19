@@ -14,11 +14,17 @@ interface CatalogProduct {
   name: string
   description?: string | null
   oneTimePrice: number
-  monthlyServiceFee: number
-  yearlyServiceFee: number
+  monthlyPrice?: number | null
+  yearlyPrice?: number | null
+  monthlyServiceFee?: number | null
+  yearlyServiceFee?: number | null
   type: ProductType
   plan?: BusinessCardPlan | null
   isActive: boolean
+}
+
+interface CatalogResponse {
+  products: CatalogProduct[]
 }
 
 interface ProductFormData {
@@ -67,11 +73,12 @@ export default function AdminCatalogPage() {
   }, [session, status, router])
 
   // Use cached API hook instead of manual state management
-  const { data: products, loading, error: fetchError, refetch } = useCachedAPI<CatalogProduct[]>(
+  const { data: catalogData, loading, error: fetchError, refetch } = useCachedAPI<CatalogResponse>(
     '/api/admin/catalog',
     [session], // Add session as dependency
     10 // Cache for 10 minutes
   )
+  const products = catalogData?.products ?? []
 
   // Set error if fetch fails
   useEffect(() => {
@@ -175,7 +182,7 @@ export default function AdminCatalogPage() {
         name: product.name,
         description: product.description || '',
         oneTimePrice: product.oneTimePrice.toString(),
-        monthlyServiceFee: product.monthlyServiceFee.toString(),
+        monthlyServiceFee: (product.monthlyServiceFee ?? product.monthlyPrice ?? 0).toString(),
         type: product.type,
         plan: product.plan || (product.type === ProductType.BUSINESS_CARD ? BusinessCardPlan.STARTER : ''),
         isActive: product.isActive
@@ -304,9 +311,9 @@ export default function AdminCatalogPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         <div>
-                          <div>One-time: {product.oneTimePrice.toFixed(2)} ₼</div>
-                          <div>Monthly: {product.monthlyServiceFee.toFixed(2)} ₼</div>
-                          <div>Yearly: {product.yearlyServiceFee.toFixed(2)} ₼</div>
+                          <div>One-time: {(product.oneTimePrice ?? 0).toFixed(2)} ₼</div>
+                          <div>Monthly: {(product.monthlyServiceFee ?? product.monthlyPrice ?? 0).toFixed(2)} ₼</div>
+                          <div>Yearly: {(product.yearlyServiceFee ?? product.yearlyPrice ?? 0).toFixed(2)} ₼</div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
