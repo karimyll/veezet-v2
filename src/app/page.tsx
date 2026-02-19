@@ -1,6 +1,8 @@
-import { prisma } from '@/lib/prisma'
+import { db } from '@/db'
+import { catalogProducts } from '@/db/schema'
+import { eq } from 'drizzle-orm'
+import type { ProductType, BusinessCardPlan } from '@/db/schema'
 import ClientHomePage from '@/components/ClientHomePage'
-import { ProductType, BusinessCardPlan } from '@prisma/client'
 
 interface CatalogProduct {
   id: string
@@ -17,27 +19,15 @@ interface CatalogProduct {
 // This will be called at build time and on-demand revalidation
 async function getCatalogProducts(): Promise<CatalogProduct[]> {
   try {
-    const products = await prisma.catalogProduct.findMany({
-      where: {
-        isActive: true
-      },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        imageUrl: true,
-        oneTimePrice: true,
-        monthlyServiceFee: true,
-        yearlyServiceFee: true,
-        type: true,
-        plan: true
-      }
-    })
+    const products = await db
+      .select()
+      .from(catalogProducts)
+      .where(eq(catalogProducts.isActive, true))
 
     return products.map(product => ({
       ...product,
       monthlyServiceFee: product.monthlyServiceFee || 0,
-      yearlyServiceFee: product.yearlyServiceFee || 0
+      yearlyServiceFee: product.yearlyServiceFee || 0,
     }))
   } catch (error) {
     console.error('Error fetching catalog products:', error)

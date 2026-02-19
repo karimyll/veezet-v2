@@ -1,188 +1,187 @@
-import { NextRequest, NextResponse } from "next/server"
-import { withAuth, AuthenticatedRequest } from "@/lib/api-auth"
-import { prisma } from "@/lib/prisma"
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { db } from '@/db'
+import {
+  businessCardProfiles,
+  contactInfos,
+  socialLinks,
+  additionalLinks,
+  type ContactType,
+} from '@/db/schema'
+import { eq, and } from 'drizzle-orm'
+import { createId } from '@paralleldrive/cuid2'
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ profileId: string }> }
+) {
+  try {
+    const { profileId } = await params
+
+    const profile = await db.query.businessCardProfiles.findFirst({
+      where: eq(businessCardProfiles.id, profileId),
+      with: {
+        contacts: true,
+        socialLinks: true,
+        additionalLinks: true,
+        product: {
+          columns: { id: true, ownerId: true, status: true },
+        },
+      },
+    })
+
+    if (!profile) {
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ profile })
+  } catch (error) {
+    console.error('Error fetching profile:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
 
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ profileId: string }> }
 ) {
-  return withAuth(request, async (req: AuthenticatedRequest) => {
-    try {
-      const userId = req.user!.id
-      const { profileId } = await params
-      const body = await req.json()
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-      // Validate required fields
-      if (!profileId) {
-        return NextResponse.json(
-          { error: "Profile ID is required" },
-          { status: 400 }
-        )
-      }
+    const { profileId } = await params
+    const body = await request.json()
 
-    // Check if the profile exists and belongs to the user
-    const existingProfile = await prisma.businessCardProfile.findUnique({
-      where: {
-        id: profileId
+    // Verify ownership
+    const existing = await db.query.businessCardProfiles.findFirst({
+      where: eq(businessCardProfiles.id, profileId),
+      with: {
+        product: { columns: { ownerId: true } },
       },
-      include: {
-        Product: {
-          select: {
-            ownerId: true,
-            status: true
-          }
-        }
-      }
     })
 
-    if (!existingProfile) {
-      return NextResponse.json(
-        { error: "Profile not found" },
-        { status: 404 }
-      )
+    if (!existing) {
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
     }
 
-    if (!existingProfile.Product || existingProfile.Product.ownerId !== userId) {
-      return NextResponse.json(
-        { error: "Unauthorized - Profile does not belong to you" },
-        { status: 403 }
-      )
+    if (existing.product.ownerId !== session.user.id && session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    if (existingProfile.Product.status !== 'ACTIVE') {
-      return NextResponse.json(
-        { error: "Cannot edit inactive product" },
-        { status: 403 }
-      )
-    }
+    const now = new Date()
 
-    // Extract data from request body
+    // Update profile fields
     const {
+      fullName,
       title,
-      profilePictureUrl,
-      notes,
+      company,
+      bio,
+      email,
+      phone,
+      website,
+      profilePicture,
+      coverImage,
+      theme,
+      slug,
       contacts,
-      socialLinks,
-      additionalLinks
+      socials,
+      links,
     } = body
 
-    // Update the profile using a transaction
-    const updatedProfile = await prisma.$transaction(async (tx) => {
-      // Update the main profile
-      const profile = await tx.businessCardProfile.update({
-        where: {
-          id: profileId
-        },
-        data: {
-          title: title || null,
-          profilePictureUrl: profilePictureUrl || null,
-          notes: notes || null
-        }
-      })
+    const profileUpdate: Record<string, unknown> = { updatedAt: now }
+    if (fullName !== undefined) profileUpdate.fullName = fullName
+    if (title !== undefined) profileUpdate.title = title
+    if (company !== undefined) profileUpdate.company = company
+    if (bio !== undefined) profileUpdate.bio = bio
+    if (email !== undefined) profileUpdate.email = email
+    if (phone !== undefined) profileUpdate.phone = phone
+    if (website !== undefined) profileUpdate.website = website
+    if (profilePicture !== undefined) profileUpdate.profilePicture = profilePicture
+    if (coverImage !== undefined) profileUpdate.coverImage = coverImage
+    if (theme !== undefined) profileUpdate.theme = theme
+    if (slug !== undefined) profileUpdate.slug = slug
 
-      // Update contacts
-      if (contacts && Array.isArray(contacts)) {
-        // Delete existing contacts
-        await tx.contactInfo.deleteMany({
-          where: {
-            profileId: profileId
-          }
-        })
+    await db
+      .update(businessCardProfiles)
+      .set(profileUpdate)
+      .where(eq(businessCardProfiles.id, profileId))
 
-        // Create new contacts
-        if (contacts.length > 0) {
-          await tx.contactInfo.createMany({
-            data: contacts.map((contact: any) => ({
-              profileId: profileId,
-              type: contact.type,
-              value: contact.value
-            }))
-          })
-        }
+    // Replace contacts: delete all then insert new
+    if (contacts !== undefined) {
+      await db.delete(contactInfos).where(eq(contactInfos.profileId, profileId))
+      if (Array.isArray(contacts) && contacts.length > 0) {
+        await db.insert(contactInfos).values(
+          contacts.map((c: { type: string; value: string; label?: string }) => ({
+            id: createId(),
+            profileId,
+            type: c.type as ContactType,
+            value: c.value,
+            label: c.label || null,
+            createdAt: now,
+            updatedAt: now,
+          }))
+        )
       }
+    }
 
-      // Update social links
-      if (socialLinks && Array.isArray(socialLinks)) {
-        // Delete existing social links
-        await tx.socialLink.deleteMany({
-          where: {
-            profileId: profileId
-          }
-        })
-
-        // Create new social links
-        if (socialLinks.length > 0) {
-          await tx.socialLink.createMany({
-            data: socialLinks.map((link: any) => ({
-              profileId: profileId,
-              name: link.name,
-              icon: link.icon || null,
-              url: link.url
-            }))
-          })
-        }
+    // Replace social links
+    if (socials !== undefined) {
+      await db.delete(socialLinks).where(eq(socialLinks.profileId, profileId))
+      if (Array.isArray(socials) && socials.length > 0) {
+        await db.insert(socialLinks).values(
+          socials.map(
+            (s: { platform: string; url: string; label?: string; icon?: string }) => ({
+              id: createId(),
+              profileId,
+              platform: s.platform,
+              url: s.url,
+              label: s.label || null,
+              icon: s.icon || null,
+              createdAt: now,
+              updatedAt: now,
+            })
+          )
+        )
       }
+    }
 
-      // Update additional links
-      if (additionalLinks && Array.isArray(additionalLinks)) {
-        // Delete existing additional links
-        await tx.additionalLink.deleteMany({
-          where: {
-            profileId: profileId
-          }
-        })
-
-        // Create new additional links
-        if (additionalLinks.length > 0) {
-          await tx.additionalLink.createMany({
-            data: additionalLinks.map((link: any) => ({
-              profileId: profileId,
-              title: link.title,
-              icon: link.icon || null,
-              url: link.url
-            }))
-          })
-        }
+    // Replace additional links
+    if (links !== undefined) {
+      await db.delete(additionalLinks).where(eq(additionalLinks.profileId, profileId))
+      if (Array.isArray(links) && links.length > 0) {
+        await db.insert(additionalLinks).values(
+          links.map(
+            (l: { title: string; url: string; description?: string; icon?: string }) => ({
+              id: createId(),
+              profileId,
+              title: l.title,
+              url: l.url,
+              description: l.description || null,
+              icon: l.icon || null,
+              createdAt: now,
+              updatedAt: now,
+            })
+          )
+        )
       }
+    }
 
-      return profile
-    })
-
-    // Fetch the complete updated profile
-    const completeProfile = await prisma.businessCardProfile.findUnique({
-      where: {
-        id: profileId
+    // Fetch updated profile
+    const updatedProfile = await db.query.businessCardProfiles.findFirst({
+      where: eq(businessCardProfiles.id, profileId),
+      with: {
+        contacts: true,
+        socialLinks: true,
+        additionalLinks: true,
       },
-      include: {
-        contacts: {
-          orderBy: {
-            id: 'asc'
-          }
-        },
-        socialLinks: {
-          orderBy: {
-            id: 'asc'
-          }
-        },
-        additionalLinks: {
-          orderBy: {
-            id: 'asc'
-          }
-        }
-      }
     })
 
-    return NextResponse.json({
-      message: "Profile updated successfully",
-      profile: completeProfile
-    })
-
+    return NextResponse.json({ profile: updatedProfile })
   } catch (error) {
-    console.error("Error updating business card profile:", error)
-    return NextResponse.json(
-      { error: "Failed to update profile" },
-      { status: 500 }
-    )
+    console.error('Error updating profile:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
-  })
 }

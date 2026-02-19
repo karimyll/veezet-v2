@@ -76,9 +76,9 @@ export default function AdminMetrics() {
   }
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('az-AZ', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'AZN'
     }).format(amount)
   }
 

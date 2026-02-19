@@ -11,7 +11,7 @@ interface ContactInfo {
 
 interface SocialLink {
   id: string
-  name: string
+  name: string | null
   icon: string | null
   url: string
 }

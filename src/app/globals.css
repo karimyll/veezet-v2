@@ -1,294 +1,213 @@
 @import "tailwindcss";
 
-/* Custom CSS Variables for HeroUI */
-:root {
-  --heroui-primary: #2D1B4E;
-  --heroui-secondary: #4C257B;
-  --heroui-tertiary: #6B46C1;
-  --heroui-dark: #1A0F2E;
+/* =============================================
+   Tailwind v4 Theme — Fonts, Colors, Animations
+   ============================================= */
+@theme {
+  --font-title: var(--font-twk-lausanne), 'TWK Lausanne', system-ui, sans-serif;
+  --font-body: var(--font-inter), 'Inter', system-ui, sans-serif;
+
+  --color-brand-50: #f5f0ff;
+  --color-brand-100: #ede5ff;
+  --color-brand-200: #ddd0ff;
+  --color-brand-300: #c4aaff;
+  --color-brand-400: #a67aff;
+  --color-brand-500: #8b4fff;
+  --color-brand-600: #7c2df6;
+  --color-brand-700: #6b1fe2;
+  --color-brand-800: #5a1abe;
+  --color-brand-900: #4b189b;
+  --color-brand-950: #2d0b69;
+
+  --ease-smooth: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Enhanced Text Hover Effects */
-.text-hover-gradient {
-  background: linear-gradient(135deg, #2D1B4E 0%, #4C257B 100%);
+/* =============================================
+   Font Application
+   ============================================= */
+
+/* Titles — TWK Lausanne */
+.font-title,
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  letter-spacing: -0.02em;
+}
+
+/* Body — Inter */
+.font-body,
+body, p, span, a, li, td, th, label, input, textarea, select, button {
+  font-family: var(--font-body);
+}
+
+/* =============================================
+   Global Base
+   ============================================= */
+
+body {
+  background-color: #fafafa;
+  color: #1a1a2e;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--color-brand-200);
+  color: var(--color-brand-950);
+}
+
+/* =============================================
+   Motion & Hover Utilities
+   ============================================= */
+
+/* Smooth card hover */
+.card-hover {
+  transition: transform 0.5s var(--ease-out-expo), box-shadow 0.5s var(--ease-out-expo);
+}
+.card-hover:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 48px -12px rgba(45, 27, 78, 0.15);
+}
+
+/* Button lift */
+.btn-lift {
+  transition: transform 0.4s var(--ease-spring), box-shadow 0.4s var(--ease-out-expo);
+}
+.btn-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -6px rgba(45, 27, 78, 0.35);
+}
+.btn-lift:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Gradient text */
+.text-gradient {
+  background: linear-gradient(135deg, #6b1fe2 0%, #4C257B 50%, #8b4fff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  transition: all 0.3s ease;
 }
 
-.text-hover-gradient:hover {
-  background: linear-gradient(135deg, #1A0F2E 0%, #2D1B4E 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  transform: translateY(-1px);
-  text-shadow: 0 4px 8px rgba(45, 27, 78, 0.3);
+/* Animated gradient background */
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.bg-gradient-animate {
+  background-size: 200% 200%;
+  animation: gradient-shift 6s ease infinite;
 }
 
-.text-hover-glow {
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.text-hover-glow:hover {
-  color: #2D1B4E;
-  text-shadow: 0 0 10px rgba(45, 27, 78, 0.5);
-  transform: translateY(-1px);
-}
-
-.text-hover-underline {
+/* Reveal line underline */
+.link-underline {
   position: relative;
-  transition: all 0.3s ease;
+  text-decoration: none;
 }
-
-.text-hover-underline::after {
+.link-underline::after {
   content: '';
   position: absolute;
   width: 0;
-  height: 2px;
-  bottom: -4px;
-  left: 50%;
-  background: linear-gradient(135deg, #2D1B4E 0%, #4C257B 100%);
-  transition: all 0.3s ease;
-  transform: translateX(-50%);
-  border-radius: 2px;
+  height: 1.5px;
+  bottom: -2px;
+  left: 0;
+  background: currentColor;
+  transition: width 0.4s var(--ease-out-expo);
 }
-
-.text-hover-underline:hover::after {
+.link-underline:hover::after {
   width: 100%;
 }
 
-.text-hover-underline:hover {
-  color: #2D1B4E;
-  transform: translateY(-1px);
+/* Glass morphism */
+.glass {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
-/* Enhanced Button Hover Effects */
-.btn-hover-lift {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* Noise texture overlay (subtle) */
+.noise::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
 }
 
-.btn-hover-lift:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(45, 27, 78, 0.4);
+/* Floating animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+.animate-float {
+  animation: float 4s ease-in-out infinite;
 }
 
-.btn-hover-pulse {
-  animation: pulse-shadow 2s infinite;
+/* Pulse ring */
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(107, 31, 226, 0.4); }
+  70% { box-shadow: 0 0 0 14px rgba(107, 31, 226, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(107, 31, 226, 0); }
+}
+.animate-pulse-ring {
+  animation: pulse-ring 2.5s ease-out infinite;
 }
 
-@keyframes pulse-shadow {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(45, 27, 78, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 0 10px rgba(45, 27, 78, 0);
-  }
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
 }
 
-/* Enhanced Card Hover Effects */
-.card-hover-float {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* =============================================
+   Marquee & Misc
+   ============================================= */
+
+/* Customer Marquee */
+.customers img {
+  filter: grayscale(100%);
+  transition: filter 0.4s var(--ease-smooth);
+}
+.customers img:hover {
+  filter: grayscale(0%);
 }
 
-.card-hover-float:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px -10px rgba(45, 27, 78, 0.2);
-}
-
-.card-hover-tilt {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.card-hover-tilt:hover {
-  transform: perspective(1000px) rotateX(5deg) rotateY(-5deg);
-  box-shadow: 0 25px 50px -12px rgba(45, 27, 78, 0.25);
-}
-
-/* Enhanced Background Hover Effects */
-.bg-hover-gradient {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  transition: all 0.3s ease;
-}
-
-.bg-hover-gradient:hover {
-  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-  box-shadow: 0 10px 25px -5px rgba(45, 27, 78, 0.1);
-}
-
-.bg-hover-dark {
-  background: linear-gradient(135deg, #2D1B4E 0%, #4C257B 100%);
-  transition: all 0.3s ease;
-}
-
-.bg-hover-dark:hover {
-  background: linear-gradient(135deg, #1A0F2E 0%, #2D1B4E 100%);
-  box-shadow: 0 15px 35px -5px rgba(45, 27, 78, 0.5);
-}
-
-/* Enhanced Link Hover Effects */
-.link-hover-slide {
+/* Marquee Fade Gradients */
+.marquee-container {
   position: relative;
   overflow: hidden;
-  transition: all 0.3s ease;
 }
-
-.link-hover-slide::before {
+.marquee-container::before,
+.marquee-container::after {
   content: '';
   position: absolute;
   top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, rgba(45, 27, 78, 0.1) 0%, rgba(76, 37, 123, 0.1) 100%);
-  transition: all 0.3s ease;
-  border-radius: inherit;
+  bottom: 0;
+  width: 80px;
+  z-index: 10;
+  pointer-events: none;
 }
-
-.link-hover-slide:hover::before {
-  left: 0;
-}
-
-.link-hover-slide:hover {
-  color: #2D1B4E;
-  transform: translateX(4px);
-}
-
-/* San Francisco Font Family */
-@font-face {
-    font-family: 'San Francisco';
-    src: url('/assets/fonts/San Francisco-Black.otf') format('opentype');
-    font-weight: 900;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'San Francisco';
-    src: url('/assets/fonts/San Francisco-Bold.otf') format('opentype');
-    font-weight: bold;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'San Francisco';
-    src: url('/assets/fonts/San Francisco-Extrabold.otf') format('opentype');
-    font-weight: 800;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'San Francisco';
-    src: url('/assets/fonts/San Francisco-Light.otf') format('opentype');
-    font-weight: 300;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'San Francisco';
-    src: url('/assets/fonts/San Francisco-Medium.otf') format('opentype');
-    font-weight: 500;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'San Francisco';
-    src: url('/assets/fonts/San Francisco-Regular.otf') format('opentype');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'San Francisco';
-    src: url('/assets/fonts/San Francisco-Semibold.otf') format('opentype');
-    font-weight: 600;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'San Francisco';
-    src: url('/assets/fonts/San Francisco-Thin3.otf') format('opentype');
-    font-weight: 100;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'San Francisco';
-    src: url('/assets/fonts/San Francisco-Ultralight3.otf') format('opentype');
-    font-weight: 200;
-    font-style: normal;
-    font-display: swap;
-}
-
-/* Global Font Application */
-* {
-    font-family: 'San Francisco', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-}
-
-body {
-    background-color: #f7f5f5;
-}
-
-/* Customer Marquee Styles */
-.customers img {
-    filter: grayscale(100%);
-}
-
-/* Marquee Container with Fade Gradients */
-.marquee-container {
-    position: relative;
-    overflow: hidden;
-}
-
-.marquee-container::before,
-.marquee-container::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 60px;
-    z-index: 10;
-    pointer-events: none;
-}
-
 .marquee-container::before {
-    left: 0;
-    background: linear-gradient(to right, #f7f5f5, transparent);
+  left: 0;
+  background: linear-gradient(to right, #fafafa, transparent);
 }
-
 .marquee-container::after {
-    right: 0;
-    background: linear-gradient(to left, #f7f5f5, transparent);
+  right: 0;
+  background: linear-gradient(to left, #fafafa, transparent);
 }
 
-/* Responsive fade widths */
 @media (max-width: 640px) {
-    .marquee-container::before,
-    .marquee-container::after {
-        width: 30px;
-    }
+  .marquee-container::before,
+  .marquee-container::after {
+    width: 30px;
+  }
 }
-
 @media (min-width: 641px) and (max-width: 1024px) {
-    .marquee-container::before,
-    .marquee-container::after {
-        width: 40px;
-    }
+  .marquee-container::before,
+  .marquee-container::after {
+    width: 40px;
+  }
 }
-
-@media (min-width: 1025px) {
-    .marquee-container::before,
-    .marquee-container::after {
-        width: 80px;
-    }
-}
-
-/* Additional global styles can be added here if needed */

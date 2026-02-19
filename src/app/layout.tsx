@@ -1,18 +1,26 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/components/AuthProvider";
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import Providers from "@/components/Providers";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const twkLausanne = localFont({
+  src: [
+    { path: '../../fontlar/TWKLausanne-600.woff2', weight: '600', style: 'normal' },
+    { path: '../../fontlar/TWKLausanne-700.woff2', weight: '700', style: 'normal' },
+    { path: '../../fontlar/TWKLausanne-750.woff2', weight: '750', style: 'normal' },
+    { path: '../../fontlar/TWKLausanne-800.woff2', weight: '800', style: 'normal' },
+  ],
+  variable: '--font-twk-lausanne',
+  display: 'swap',
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -26,9 +34,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="az">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${twkLausanne.variable} ${inter.variable} font-body antialiased`}
         suppressHydrationWarning={true}
       >
         <Providers>

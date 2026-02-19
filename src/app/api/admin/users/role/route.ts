@@ -1,45 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { withAdminAuth, AuthenticatedRequest } from '@/lib/api-auth'
-import { prisma } from '@/lib/prisma'
+import { withAdminAuth } from '@/lib/api-auth'
+import { db } from '@/db'
+import { users, type UserRole } from '@/db/schema'
+import { eq } from 'drizzle-orm'
 
-export async function POST(req: NextRequest) {
-  return withAdminAuth(req, async (request: AuthenticatedRequest) => {
+export async function PUT(request: NextRequest) {
+  return withAdminAuth(request, async () => {
     try {
-      const { userId, role } = await request.json()
-      
+      const { userId, role } = (await request.json()) as {
+        userId: string
+        role: UserRole
+      }
+
       if (!userId || !role) {
-        return NextResponse.json(
-          { error: 'User ID and role are required' },
-          { status: 400 }
-        )
+        return NextResponse.json({ error: 'userId and role are required' }, { status: 400 })
       }
 
-      if (!['USER', 'ADMIN'].includes(role)) {
-        return NextResponse.json(
-          { error: 'Invalid role. Must be USER or ADMIN' },
-          { status: 400 }
-        )
+      const validRoles: UserRole[] = ['USER', 'ADMIN']
+      if (!validRoles.includes(role)) {
+        return NextResponse.json({ error: 'Invalid role' }, { status: 400 })
       }
 
-      const updatedUser = await prisma.user.update({
-        where: { id: userId },
-        data: { role: role as 'USER' | 'ADMIN' },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-          createdAt: true
-        }
-      })    
+      const [updated] = await db
+        .update(users)
+        .set({ role, updatedAt: new Date() })
+        .where(eq(users.id, userId))
+        .returning()
 
-      return NextResponse.json({ user: updatedUser })
+      if (!updated) {
+        return NextResponse.json({ error: 'User not found' }, { status: 404 })
+      }
+
+      return NextResponse.json({
+        user: {
+          id: updated.id,
+          name: updated.name,
+          email: updated.email,
+          role: updated.role,
+        },
+      })
     } catch (error) {
       console.error('Error updating user role:', error)
-      return NextResponse.json(
-        { error: 'Failed to update user role' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
   })
 }

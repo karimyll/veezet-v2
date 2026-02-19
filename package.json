@@ -1,31 +1,34 @@
 {
   "name": "veezet-app",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "dependencies": {
-    "@auth/prisma-adapter": "^2.10.0",
+    "@aws-sdk/client-s3": "^3.712.0",
+    "@aws-sdk/s3-request-presigner": "^3.712.0",
     "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
     "@heroui/react": "^2.7.11",
     "@heroui/theme": "^2.4.17",
-    "@prisma/client": "^6.11.0",
-    "@types/bcrypt": "^5.0.2",
-    "@types/bcryptjs": "^2.4.6",
-    "@types/pg": "^8.15.4",
+    "@paralleldrive/cuid2": "^2.2.2",
     "@vercel/speed-insights": "^1.2.0",
-    "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
+    "drizzle-orm": "^0.38.3",
     "framer-motion": "^12.23.0",
     "next": "15.3.4",
     "next-auth": "^4.24.11",
-    "pg": "^8.16.3",
+    "postgres": "^3.4.8",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-fast-marquee": "^1.6.5"
@@ -33,13 +36,17 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^5.1.4",
+    "dotenv": "^17.3.1",
+    "drizzle-kit": "^0.30.1",
     "eslint": "^9",
     "eslint-config-next": "15.3.4",
-    "prisma": "^6.11.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.0.18"
   }
 }

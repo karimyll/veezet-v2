@@ -1,39 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuth, AuthenticatedRequest } from '@/lib/api-auth'
-import { prisma } from '@/lib/prisma'
+import { db } from '@/db'
+import { users } from '@/db/schema'
+import { eq } from 'drizzle-orm'
 
-// GET /api/me - Get current user information
 export async function GET(request: NextRequest) {
   return withAuth(request, async (req: AuthenticatedRequest) => {
     try {
       const userId = req.user!.id
 
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: {
+      const user = await db.query.users.findFirst({
+        where: eq(users.id, userId),
+        columns: {
           id: true,
           email: true,
           name: true,
           role: true,
           createdAt: true,
-          updatedAt: true
-        }
+          updatedAt: true,
+        },
       })
 
       if (!user) {
-        return NextResponse.json(
-          { error: 'User not found' },
-          { status: 404 }
-        )
+        return NextResponse.json({ error: 'User not found' }, { status: 404 })
       }
 
       return NextResponse.json(user)
     } catch (error) {
       console.error('Error fetching user:', error)
-      return NextResponse.json(
-        { error: 'Failed to fetch user information' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Failed to fetch user information' }, { status: 500 })
     }
   })
 }

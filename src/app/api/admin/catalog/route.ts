@@ -1,108 +1,70 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { withAdminAuth, AuthenticatedRequest } from '@/lib/api-auth'
-import { prisma } from '@/lib/prisma'
-import { ProductType, BusinessCardPlan } from '@prisma/client'
+import { withAdminAuth } from '@/lib/api-auth'
+import { db } from '@/db'
+import { catalogProducts } from '@/db/schema'
+import { desc } from 'drizzle-orm'
 
-const PRODUCT_TYPES: ProductType[] = ['BUSINESS_CARD', 'REDIRECT_ITEM', 'STATIC_ITEM']
-const BUSINESS_CARD_PLANS: BusinessCardPlan[] = ['STARTER', 'PROFESSIONAL', 'BUSINESS']
-
-// GET /api/admin/catalog - Returns all catalog products
 export async function GET(request: NextRequest) {
   return withAdminAuth(request, async () => {
     try {
-      const catalogProducts = await prisma.catalogProduct.findMany({
-        where: {
-          isActive: true
-        }
+      const products = await db.query.catalogProducts.findMany({
+        orderBy: desc(catalogProducts.createdAt),
       })
-      return NextResponse.json(catalogProducts)
+      return NextResponse.json({ products })
     } catch (error) {
       console.error('Error fetching catalog products:', error)
-      return NextResponse.json(
-        { error: 'Failed to fetch catalog products' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
   })
 }
 
-// POST /api/admin/catalog - Creates a new catalog product
 export async function POST(request: NextRequest) {
-  return withAdminAuth(request, async (req: AuthenticatedRequest) => {
+  return withAdminAuth(request, async () => {
     try {
-      const body = await req.json()
-      const { name, description, oneTimePrice, monthlyServiceFee, type, plan } = body
-
-      // Validate required fields
-      if (!name || !oneTimePrice || !monthlyServiceFee || !type) {
-        return NextResponse.json(
-          { error: 'Name, one-time price, monthly service fee, and type are required' },
-          { status: 400 }
-        )
-      }
-
-      // Validate product type
-      if (!PRODUCT_TYPES.includes(type)) {
-        return NextResponse.json(
-          { error: 'Invalid product type' },
-          { status: 400 }
-        )
-      }
-
-      // Validate prices
-      if (isNaN(parseFloat(oneTimePrice)) || parseFloat(oneTimePrice) <= 0) {
-        return NextResponse.json(
-          { error: 'One-time price must be a positive number' },
-          { status: 400 }
-        )
-      }
-
-      if (isNaN(parseFloat(monthlyServiceFee)) || parseFloat(monthlyServiceFee) <= 0) {
-        return NextResponse.json(
-          { error: 'Monthly service fee must be a positive number' },
-          { status: 400 }
-        )
-      }
-
-      // Validate plan if provided (required for business cards)
-      if (type === 'BUSINESS_CARD' && plan && !BUSINESS_CARD_PLANS.includes(plan)) {
-        return NextResponse.json(
-          { error: 'Invalid business card plan' },
-          { status: 400 }
-        )
-      }
-
-      // Auto-calculate yearly service fee (monthly * 12 * 0.90)
-      const yearlyServiceFee = parseFloat(monthlyServiceFee) * 12 * 0.90
-
-      const productData = {
+      const body = await request.json()
+      const {
         name,
-        description: description || null,
-        oneTimePrice: parseFloat(oneTimePrice),
-        monthlyServiceFee: parseFloat(monthlyServiceFee),
-        yearlyServiceFee: Math.round(yearlyServiceFee * 100) / 100, // Round to 2 decimal places
+        description,
         type,
-        plan: plan || null,
-        isActive: true
+        plan,
+        features,
+        oneTimePrice,
+        monthlyPrice,
+        yearlyPrice,
+        isActive,
+        imageUrl,
+        modelUrl,
+        modelPoster,
+        colorOptions,
+      } = body
+
+      if (!name || !type) {
+        return NextResponse.json({ error: 'name and type are required' }, { status: 400 })
       }
 
-      const catalogProduct = await prisma.catalogProduct.create({
-        data: productData
-      })
-      
-      return NextResponse.json(catalogProduct, { status: 201 })
+      const [product] = await db
+        .insert(catalogProducts)
+        .values({
+          name,
+          description: description || null,
+          type,
+          plan: plan || 'STARTER',
+          features: features ? JSON.stringify(features) : null,
+          oneTimePrice: oneTimePrice ?? 0,
+          monthlyPrice: monthlyPrice ?? 0,
+          yearlyPrice: yearlyPrice ?? 0,
+          isActive: isActive !== undefined ? Boolean(isActive) : true,
+          imageUrl: imageUrl || null,
+          modelUrl: modelUrl || null,
+          modelPoster: modelPoster || null,
+          colorOptions: colorOptions ? JSON.stringify(colorOptions) : null,
+        })
+        .returning()
+
+      return NextResponse.json({ product }, { status: 201 })
     } catch (error) {
       console.error('Error creating catalog product:', error)
-      return NextResponse.json(
-        { 
-          error: 'Failed to create catalog product', 
-          details: { 
-            name: error instanceof Error ? error.name : 'Unknown', 
-            message: error instanceof Error ? error.message : 'Unknown error'
-          } 
-        },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
   })
 }

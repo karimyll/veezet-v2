@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button'
 import Navbar from '@/components/Navbar'
 import Hero from '@/components/Hero'
 import Marquee from "react-fast-marquee"
-import { ProductType, BusinessCardPlan } from '@prisma/client'
+import { ProductType, BusinessCardPlan } from '@/db/schema'
 import DigitalBusinessCardsSection from '@/components/DigitalBusinessCardsSection'
 import SpecialModelSection from '@/components/SpecialModelSection'
 import ProductsSection from '@/components/ProductsSection'

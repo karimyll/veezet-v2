@@ -59,7 +59,7 @@ export default function AdminOrdersPage() {
     if (status === 'loading') return;
     
     if (!session) {
-      router.push('/api/auth/signin');
+      router.push('/auth/signin');
       return;
     }
 
@@ -128,9 +128,9 @@ export default function AdminOrdersPage() {
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('az-AZ', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'AZN'
     }).format(price);
   };
 

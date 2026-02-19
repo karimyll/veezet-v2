@@ -11,7 +11,7 @@ export default function Providers({ children }: ProviderProps) {
   return (
     <HeroUIProvider
       locale="en-US"
-      skipFramerMotionAnimations={true}
+      skipFramerMotionAnimations={false}
     >
       {children}
     </HeroUIProvider>

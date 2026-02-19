@@ -1,67 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { withAdminAuth, AuthenticatedRequest } from '@/lib/api-auth'
-import { prisma } from '@/lib/prisma'
+import { withAdminAuth } from '@/lib/api-auth'
+import { db } from '@/db'
+import { businessCardProfiles } from '@/db/schema'
+import { desc, sql } from 'drizzle-orm'
 
 export async function GET(request: NextRequest) {
-  return withAdminAuth(request, async (_req: AuthenticatedRequest) => {
+  return withAdminAuth(request, async () => {
     try {
-      // Fetch all business card profiles with their owner info
-      const profiles = await prisma.businessCardProfile.findMany({
-        select: {
+      const profiles = await db.query.businessCardProfiles.findMany({
+        columns: {
           id: true,
           slug: true,
           fullName: true,
           title: true,
+          company: true,
           views: true,
           createdAt: true,
-          Product: {
-            select: {
-              createdAt: true,
+        },
+        with: {
+          product: {
+            columns: { id: true, status: true },
+            with: {
               owner: {
-                select: {
-                  id: true,
-                  email: true,
-                  name: true,
-                }
-              }
-            }
-          }
-        }
+                columns: { id: true, name: true, email: true },
+              },
+            },
+          },
+        },
+        orderBy: desc(businessCardProfiles.views),
       })
 
-      // Transform the data to match our interface
-      const transformedProfiles = profiles.map((profile: any) => ({
-        id: profile.id,
-        slug: profile.slug,
-        fullName: profile.fullName || profile.title || 'No name',
-        title: profile.title || 'No title',
-        views: profile.views || 0, // Use real views data from database
-        createdAt: profile.Product?.createdAt.toISOString() || new Date().toISOString(),
-        owner: {
-          id: profile.Product?.owner.id || '',
-          email: profile.Product?.owner.email || '',
-          name: profile.Product?.owner.name || null,
-        }
-      }))
-
-      // Sort by views (real data from database)
-      const sortedProfiles = transformedProfiles.sort((a: any, b: any) => b.views - a.views)
-
-      // Calculate totals
-      const totalProfiles = sortedProfiles.length
-      const totalViews = sortedProfiles.reduce((sum: number, profile: any) => sum + profile.views, 0)
+      const totalViews = profiles.reduce((sum, p) => sum + (p.views || 0), 0)
 
       return NextResponse.json({
-        profiles: sortedProfiles,
-        totalProfiles,
-        totalViews,
+        profiles,
+        summary: {
+          totalProfiles: profiles.length,
+          totalViews,
+          averageViews: profiles.length ? Math.round(totalViews / profiles.length) : 0,
+        },
       })
     } catch (error) {
       console.error('Error fetching profile analytics:', error)
-      return NextResponse.json(
-        { error: 'Failed to fetch profile analytics' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
   })
 }

@@ -1,11 +1,11 @@
 import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-import { PrismaAdapter } from "@auth/prisma-adapter"
-import { prisma } from "./prisma"
+import { db } from "@/db"
+import { users } from "@/db/schema"
+import { eq } from "drizzle-orm"
 import bcrypt from "bcryptjs"
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as any,
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -18,10 +18,8 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email
-          }
+        const user = await db.query.users.findFirst({
+          where: eq(users.email, credentials.email),
         })
 
         if (!user || !user.password) {
@@ -41,7 +39,7 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           email: user.email,
           name: user.name,
-          role: (user as any).role || "USER",
+          role: user.role || "USER",
         }
       }
     })
@@ -62,8 +60,8 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (token && session.user) {
-        (session.user as any).id = token.id as string
-        (session.user as any).role = token.role as string
+        session.user.id = token.id as string
+        session.user.role = token.role as string
       }
       return session
     }

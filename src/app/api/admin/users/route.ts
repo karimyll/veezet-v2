@@ -1,31 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { withAdminAuth, AuthenticatedRequest } from '@/lib/api-auth'
-import { prisma } from '@/lib/prisma'
+import { withAdminAuth } from '@/lib/api-auth'
+import { db } from '@/db'
+import { users } from '@/db/schema'
+import { desc } from 'drizzle-orm'
 
-export async function GET(req: NextRequest) {
-  return withAdminAuth(req, async (_request: AuthenticatedRequest) => {
+export async function GET(request: NextRequest) {
+  return withAdminAuth(request, async () => {
     try {
-      const users = await prisma.user.findMany({
-        select: {
+      const allUsers = await db.query.users.findMany({
+        columns: {
           id: true,
           name: true,
           email: true,
           role: true,
           createdAt: true,
-          updatedAt: true
         },
-        orderBy: {
-          createdAt: 'desc'
-        }
+        orderBy: desc(users.createdAt),
       })
 
-      return NextResponse.json({ users })
+      return NextResponse.json({ users: allUsers })
     } catch (error) {
       console.error('Error fetching users:', error)
-      return NextResponse.json(
-        { error: 'Failed to fetch users' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
   })
 }

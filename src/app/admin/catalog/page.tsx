@@ -3,24 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-// import { CatalogProduct, ProductType } from '@prisma/client'
+import { ProductType, BusinessCardPlan } from '@/db/schema'
 import { Button } from '@/components/ui/Button'
 import { Input, Select, Textarea } from '@/components/ui/FormControls'
 import { Modal } from '@/components/ui/Modal'
 import { useCachedAPI } from '@/lib/api-cache'
-
-// Define types manually until Prisma client is regenerated
-enum ProductType {
-  BUSINESS_CARD = 'BUSINESS_CARD',
-  REDIRECT_ITEM = 'REDIRECT_ITEM',
-  STATIC_ITEM = 'STATIC_ITEM'
-}
-
-enum BusinessCardPlan {
-  STARTER = 'STARTER',
-  PROFESSIONAL = 'PROFESSIONAL',
-  BUSINESS = 'BUSINESS'
-}
 
 interface CatalogProduct {
   id: string
@@ -260,15 +247,9 @@ export default function AdminCatalogPage() {
 
         {/* Add Product Button */}
         <div className="mb-6">
-          <Button onClick={() => {
-            console.log('Add New Product button clicked')
-            openModal()
-          }}>
+          <Button onClick={() => openModal()}>
             Add New Product
           </Button>
-          <div className="text-xs text-gray-500 mt-2">
-            Modal state: {isModalOpen ? 'Open' : 'Closed'}
-          </div>
         </div>
 
         {/* Products Table */}

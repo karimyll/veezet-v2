@@ -1,35 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { db } from '@/db'
+import { catalogProducts } from '@/db/schema'
+import { eq, asc } from 'drizzle-orm'
 
 export async function GET(_request: NextRequest) {
   try {
-    const products = await prisma.catalogProduct.findMany({
-      where: {
-        isActive: true,
-      },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        oneTimePrice: true,
-        monthlyServiceFee: true,
-        yearlyServiceFee: true,
-        type: true,
-        plan: true,
-        isActive: true,
-        imageUrl: true,
-      },
-      orderBy: {
-        name: 'asc',
-      },
-    })
+    const products = await db
+      .select()
+      .from(catalogProducts)
+      .where(eq(catalogProducts.isActive, true))
+      .orderBy(asc(catalogProducts.name))
 
     return NextResponse.json(products)
   } catch (error) {
     console.error('Error fetching marketplace products:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch products' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 })
   }
 }

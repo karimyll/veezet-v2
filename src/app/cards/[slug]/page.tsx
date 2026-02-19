@@ -1,166 +1,123 @@
+import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
+import { db } from '@/db'
+import { businessCardProfiles } from '@/db/schema'
+import { eq, sql } from 'drizzle-orm'
 import ClientCardPage from '@/components/ClientCardPage'
 
-interface ContactInfo {
-  id: string
-  type: string
-  value: string
+interface CardPageProps {
+  params: Promise<{ slug: string }>
 }
 
-interface SocialLink {
-  id: string
-  name: string
-  icon: string | null
-  url: string
-}
+export async function generateMetadata({ params }: CardPageProps): Promise<Metadata> {
+  const { slug } = await params
 
-interface AdditionalLink {
-  id: string
-  title: string
-  icon: string | null
-  url: string
-}
+  const profile = await db.query.businessCardProfiles.findFirst({
+    where: eq(businessCardProfiles.slug, slug),
+    columns: {
+      fullName: true,
+      title: true,
+      company: true,
+      bio: true,
+      profilePicture: true,
+    },
+  })
 
-interface PublicCardData {
-  slug: string
-  title: string | null
-  profilePictureUrl: string | null
-  notes: string | null
-  plan: string
-  owner: {
-    name: string | null
-    email: string
+  if (!profile) {
+    return { title: 'Kart tapılmadı — Veezet' }
   }
-  contacts: ContactInfo[]
-  socialLinks: SocialLink[]
-  additionalLinks: AdditionalLink[]
-  productName: string
+
+  const title = `${profile.fullName} — Veezet`
+  const description =
+    profile.bio ||
+    `${profile.fullName}${profile.title ? ` | ${profile.title}` : ''}${profile.company ? ` @ ${profile.company}` : ''}`
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      ...(profile.profilePicture
+        ? { images: [{ url: profile.profilePicture, width: 400, height: 400 }] }
+        : {}),
+    },
+  }
 }
 
-// Generate static params for all active business card slugs
+export default async function CardPage({ params }: CardPageProps) {
+  const { slug } = await params
+
+  const profile = await db.query.businessCardProfiles.findFirst({
+    where: eq(businessCardProfiles.slug, slug),
+    with: {
+      contacts: true,
+      socialLinks: true,
+      additionalLinks: true,
+      product: {
+        with: {
+          owner: true,
+          catalogProduct: true,
+        },
+      },
+    },
+  })
+
+  if (!profile || profile.product?.status !== 'ACTIVE') {
+    notFound()
+  }
+
+  // Increment view count (fire-and-forget)
+  db.update(businessCardProfiles)
+    .set({ views: sql`${businessCardProfiles.views} + 1` })
+    .where(eq(businessCardProfiles.id, profile.id))
+    .then(() => {})
+    .catch((err: unknown) => console.error('View increment failed:', err))
+
+  const initialCardData = {
+    slug: profile.slug,
+    title: profile.title ?? null,
+    profilePictureUrl: profile.profilePictureUrl ?? null,
+    notes: profile.notes ?? null,
+    plan: profile.plan,
+    owner: {
+      name: profile.product.owner.name ?? null,
+      email: profile.product.owner.email,
+    },
+    contacts: (profile.contacts ?? []).map((c: { id: string; type: string; value: string }) => ({
+      id: c.id,
+      type: c.type,
+      value: c.value,
+    })),
+    socialLinks: (profile.socialLinks ?? []).map((l: { id: string; name: string | null; icon: string | null; url: string }) => ({
+      id: l.id,
+      name: l.name,
+      icon: l.icon,
+      url: l.url,
+    })),
+    additionalLinks: (profile.additionalLinks ?? []).map((l: { id: string; title: string; icon: string | null; url: string }) => ({
+      id: l.id,
+      title: l.title,
+      icon: l.icon,
+      url: l.url,
+    })),
+    productName: profile.product.catalogProduct.name,
+  }
+
+  return <ClientCardPage initialCardData={initialCardData} />
+}
+
 export async function generateStaticParams() {
   try {
-    const profiles = await prisma.businessCardProfile.findMany({
-      select: {
-        slug: true
-      },
-      where: {
-        Product: {
-          status: 'ACTIVE'
-        }
-      }
+    const profiles = await db.query.businessCardProfiles.findMany({
+      columns: { slug: true },
     })
 
-    return profiles.map((profile) => ({
-      slug: profile.slug
-    }))
-  } catch (error) {
-    console.error('Error generating static params for cards:', error)
+    return profiles.map((p: { slug: string }) => ({ slug: p.slug }))
+  } catch {
+    // D1 env vars may not be available at build time
     return []
   }
 }
 
-// Fetch card data for a specific slug
-async function getCardData(slug: string): Promise<PublicCardData | null> {
-  try {
-    const profile = await prisma.businessCardProfile.findUnique({
-      where: { slug },
-      include: {
-        contacts: true,
-        socialLinks: true,
-        additionalLinks: true,
-        Product: {
-          include: {
-            owner: {
-              select: {
-                name: true,
-                email: true
-              }
-            },
-            catalogProduct: {
-              select: {
-                name: true
-              }
-            }
-          }
-        }
-      }
-    })
-
-    if (!profile || !profile.Product || profile.Product.status !== 'ACTIVE') {
-      return null
-    }
-
-    return {
-      slug: profile.slug,
-      title: profile.title,
-      profilePictureUrl: profile.profilePictureUrl,
-      notes: profile.notes,
-      plan: profile.plan,
-      owner: {
-        name: profile.Product.owner.name,
-        email: profile.Product.owner.email
-      },
-      contacts: profile.contacts.map(contact => ({
-        id: contact.id,
-        type: contact.type,
-        value: contact.value
-      })),
-      socialLinks: profile.socialLinks.map(link => ({
-        id: link.id,
-        name: link.name,
-        icon: link.icon,
-        url: link.url
-      })),
-      additionalLinks: profile.additionalLinks.map(link => ({
-        id: link.id,
-        title: link.title,
-        icon: link.icon,
-        url: link.url
-      })),
-      productName: profile.Product.catalogProduct?.name || 'Business Card'
-    }
-  } catch (error) {
-    console.error('Error fetching card data:', error)
-    return null
-  }
-}
-
-// Track view for a profile
-async function trackView(slug: string) {
-  try {
-    await prisma.businessCardProfile.update({
-      where: { slug },
-      data: {
-        views: {
-          increment: 1
-        }
-      }
-    })
-  } catch (error) {
-    console.error('Error tracking view:', error)
-  }
-}
-
-// Server Component
-export default async function PublicCardPage({ 
-  params 
-}: { 
-  params: Promise<{ slug: string }> 
-}) {
-  const resolvedParams = await params
-  const cardData = await getCardData(resolvedParams.slug)
-
-  if (!cardData) {
-    notFound()
-  }
-
-  // Track view in the background (fire and forget)
-  trackView(resolvedParams.slug)
-
-  return <ClientCardPage initialCardData={cardData} />
-}
-
-// Enable ISR with 1 hour revalidation for card pages
-export const revalidate = 3600 // 1 hour
+export const revalidate = 60

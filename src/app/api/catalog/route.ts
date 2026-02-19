@@ -1,37 +1,29 @@
 import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { db } from '@/db'
+import { catalogProducts } from '@/db/schema'
+import { eq, asc } from 'drizzle-orm'
 
-const prisma = new PrismaClient()
-
-// GET /api/catalog - Returns all active catalog products for public marketplace
 export async function GET() {
   try {
-    const catalogProducts = await prisma.catalogProduct.findMany({
-      where: {
-        isActive: true
-      },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        imageUrl: true,
-        oneTimePrice: true,
-        monthlyServiceFee: true,
-        yearlyServiceFee: true,
-        type: true,
-        plan: true
-      },
-      orderBy: {
-        name: 'asc'
-      }
-    })
+    const products = await db
+      .select({
+        id: catalogProducts.id,
+        name: catalogProducts.name,
+        description: catalogProducts.description,
+        imageUrl: catalogProducts.imageUrl,
+        oneTimePrice: catalogProducts.oneTimePrice,
+        monthlyServiceFee: catalogProducts.monthlyServiceFee,
+        yearlyServiceFee: catalogProducts.yearlyServiceFee,
+        type: catalogProducts.type,
+        plan: catalogProducts.plan,
+      })
+      .from(catalogProducts)
+      .where(eq(catalogProducts.isActive, true))
+      .orderBy(asc(catalogProducts.name))
 
-    return NextResponse.json(catalogProducts)
+    return NextResponse.json(products)
   } catch (error) {
     console.error('Error fetching public catalog:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch catalog products' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch catalog products' }, { status: 500 })
   }
 }

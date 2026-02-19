@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/Button'
-import { ProductType, BusinessCardPlan } from '@prisma/client'
+import { ProductType, BusinessCardPlan } from '@/db/schema'
+import { Reveal, StaggerReveal, StaggerItem, Magnetic, GradientBlob } from '@/components/ui/MotionElements'
 
 interface CatalogProduct {
   id: string
@@ -43,31 +44,38 @@ export default function ProductsSection({ products }: ProductsSectionProps) {
     <section id="products" className="py-32 bg-gradient-to-br from-purple-50 to-white relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0">
-        <div className="absolute top-20 left-20 w-96 h-96 bg-purple-100/30 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-20 w-80 h-80 bg-cyan-100/20 rounded-full blur-3xl"></div>
+        <GradientBlob className="absolute top-20 left-20" size={384} colors={['#f3e8ff', '#e0e7ff']} />
+        <GradientBlob className="absolute bottom-20 right-20" size={320} colors={['#cffafe', '#ede9fe']} />
       </div>
       
       <div className="container mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
         <div className="text-center mb-20">
-          <div className="inline-flex items-center px-4 py-2 bg-purple-50 border border-purple-200 rounded-full text-purple-700 text-sm font-medium mb-6">
-            <span className="w-2 h-2 bg-purple-400 rounded-full mr-2"></span>
-            Məhsullar
-          </div>
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
-            Sizin üçün hazırlanmış{' '}
-            <span className="bg-gradient-to-r from-purple-600 to-cyan-600 bg-clip-text text-transparent">
-              NFC həlləri
-            </span>
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Yüksək keyfiyyətli materiallar və innovativ texnologiya ilə hazırlanmış məhsullarımız
-          </p>
+          <Reveal variant="fadeUp">
+            <div className="inline-flex items-center px-4 py-2 bg-purple-50 border border-purple-200 rounded-full text-purple-700 text-sm font-medium mb-6">
+              <span className="w-2 h-2 bg-purple-400 rounded-full mr-2 animate-pulse-ring"></span>
+              Məhsullar
+            </div>
+          </Reveal>
+          <Reveal variant="fadeUp" delay={0.1}>
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6 font-title">
+              Sizin üçün hazırlanmış{' '}
+              <span className="text-gradient">
+                NFC həlləri
+              </span>
+            </h2>
+          </Reveal>
+          <Reveal variant="fadeUp" delay={0.2}>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Yüksək keyfiyyətli materiallar və innovativ texnologiya ilə hazırlanmış məhsullarımız
+            </p>
+          </Reveal>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <StaggerReveal className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {products.map((product) => (
-            <div key={product.id} className="group relative">
-              <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+            <StaggerItem key={product.id}>
+            <div className="group relative">
+              <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden card-hover">
                 {/* Product Image */}
                 <div className="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 p-8 relative overflow-hidden">
                   {product.imageUrl ? (
@@ -94,7 +102,7 @@ export default function ProductsSection({ products }: ProductsSectionProps) {
                 {/* Product Info */}
                 <div className="p-8 space-y-6">
                   <div className="space-y-3">
-                    <h3 className="text-xl font-bold text-gray-900">{product.name}</h3>
+                    <h3 className="text-xl font-bold text-gray-900 font-title">{product.name}</h3>
                     {product.description && (
                       <p className="text-gray-600 text-sm leading-relaxed">{product.description}</p>
                     )}
@@ -133,30 +141,33 @@ export default function ProductsSection({ products }: ProductsSectionProps) {
 
                   {/* Action Button */}
                   <Link href={`/order/${product.id}`}>
-                    <Button className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-3 px-6 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg">
+                    <Button className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-3 px-6 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg btn-lift">
                       Sifariş et
                     </Button>
                   </Link>
                 </div>
               </div>
             </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerReveal>
 
         {/* Call to Action */}
-        <div className="text-center mt-20  rounded-3xl border border-gray-100">
-          <div className="bg-white rounded-3xl p-12 text-gray-900">
-            <h3 className="text-3xl font-bold mb-4">Xüsusi layihəniz var?</h3>
-            <p className="text-xl mb-8 opacity-90">
-              Bizim komanda sizin üçün fərdi həllər hazırlamağa hazırdır
-            </p>
-           
-              <a  className="inline-flex items-center px-8 py-4 bg-transparent border-2 border-gray-900 text-gray-900 font-medium rounded-full hover:bg-gray-900 hover:text-white transition-all duration-300 group">
-                 Əlaqə saxla
-              </a>
-
+        <Reveal variant="fadeUp" delay={0.2}>
+          <div className="text-center mt-20 rounded-3xl border border-gray-100">
+            <div className="bg-white rounded-3xl p-12 text-gray-900">
+              <h3 className="text-3xl font-bold mb-4 font-title">Xüsusi layihəniz var?</h3>
+              <p className="text-xl mb-8 opacity-90">
+                Bizim komanda sizin üçün fərdi həllər hazırlamağa hazırdır
+              </p>
+              <Magnetic strength={0.2}>
+                <a className="inline-flex items-center px-8 py-4 bg-transparent border-2 border-gray-900 text-gray-900 font-medium rounded-full hover:bg-gray-900 hover:text-white transition-all duration-300 group btn-lift">
+                  Əlaqə saxla
+                </a>
+              </Magnetic>
+            </div>
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   )

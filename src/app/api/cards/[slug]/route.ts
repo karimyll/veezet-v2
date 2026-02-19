@@ -1,5 +1,7 @@
-import { NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { NextRequest, NextResponse } from 'next/server'
+import { db } from '@/db'
+import { businessCardProfiles, contactInfos, socialLinks, additionalLinks, products, users, catalogProducts } from '@/db/schema'
+import { eq } from 'drizzle-orm'
 
 export async function GET(
   request: NextRequest,
@@ -9,105 +11,50 @@ export async function GET(
     const { slug } = await params
 
     if (!slug) {
-      return NextResponse.json(
-        { error: "Slug is required" },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Slug is required' }, { status: 400 })
     }
 
-    // Find the business card profile by slug
-    const profile = await prisma.businessCardProfile.findUnique({
-      where: {
-        slug: slug
+    const profile = await db.query.businessCardProfiles.findFirst({
+      where: eq(businessCardProfiles.slug, slug),
+      with: {
+        contacts: true,
+        socialLinks: true,
+        additionalLinks: true,
+        product: {
+          with: {
+            owner: true,
+            catalogProduct: true,
+          },
+        },
       },
-      include: {
-        contacts: {
-          orderBy: {
-            id: 'asc'
-          }
-        },
-        socialLinks: {
-          orderBy: {
-            id: 'asc'
-          }
-        },
-        additionalLinks: {
-          orderBy: {
-            id: 'asc'
-          }
-        },
-        Product: {
-          include: {
-            owner: {
-              select: {
-                name: true,
-                email: true
-              }
-            },
-            catalogProduct: {
-              select: {
-                name: true,
-                plan: true
-              }
-            }
-          }
-        }
-      }
     })
 
     if (!profile) {
-      return NextResponse.json(
-        { error: "Business card not found" },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Business card not found' }, { status: 404 })
     }
 
-    // Check if the product is active
-    if (!profile.Product || profile.Product.status !== 'ACTIVE') {
-      return NextResponse.json(
-        { error: "Business card is not active" },
-        { status: 403 }
-      )
+    if (!profile.product || profile.product.status !== 'ACTIVE') {
+      return NextResponse.json({ error: 'Business card is not active' }, { status: 403 })
     }
 
-    // Transform the data for public consumption
     const publicCardData = {
       slug: profile.slug,
+      fullName: profile.fullName,
       title: profile.title,
       profilePictureUrl: profile.profilePictureUrl,
       notes: profile.notes,
       plan: profile.plan,
-      owner: {
-        name: profile.Product.owner.name,
-        email: profile.Product.owner.email
-      },
-      contacts: profile.contacts.map(contact => ({
-        id: contact.id,
-        type: contact.type,
-        value: contact.value
-      })),
-      socialLinks: profile.socialLinks.map(link => ({
-        id: link.id,
-        name: link.name,
-        icon: link.icon,
-        url: link.url
-      })),
-      additionalLinks: profile.additionalLinks.map(link => ({
-        id: link.id,
-        title: link.title,
-        icon: link.icon,
-        url: link.url
-      })),
-      productName: profile.Product.catalogProduct.name
+      views: profile.views,
+      owner: { name: profile.product.owner.name },
+      contacts: profile.contacts.map((c: { id: string; type: string; value: string }) => ({ id: c.id, type: c.type, value: c.value })),
+      socialLinks: profile.socialLinks.map((l: { id: string; name: string | null; icon: string | null; url: string }) => ({ id: l.id, name: l.name, icon: l.icon, url: l.url })),
+      additionalLinks: profile.additionalLinks.map((l: { id: string; title: string; icon: string | null; url: string }) => ({ id: l.id, title: l.title, icon: l.icon, url: l.url })),
+      productName: profile.product.catalogProduct.name,
     }
 
     return NextResponse.json(publicCardData)
-
   } catch (error) {
-    console.error("Error fetching public card data:", error)
-    return NextResponse.json(
-      { error: "Failed to fetch card data" },
-      { status: 500 }
-    )
+    console.error('Error fetching public card data:', error)
+    return NextResponse.json({ error: 'Failed to fetch card data' }, { status: 500 })
   }
 }
